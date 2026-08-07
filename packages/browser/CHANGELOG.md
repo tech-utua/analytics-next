@@ -4,6 +4,22 @@
 
 ### Minor Changes
 
+- [`4f206595`](https://github.com/segmentio/analytics-next/commit/4f206595a93af97b0ce01e3bfd9139b136bb913a) Thanks [@furtadosamuel](https://github.com/furtadosamuel)! - Add Lotame Analytics enrichment support for the Conversion SDK.
+
+### Patch Changes
+
+- [`d09b7920`](https://github.com/segmentio/analytics-next/commit/d09b79209c53e7ff1030bb17af0e42f973813cd6) Thanks [@JeisielRamosOliveira](https://github.com/JeisielRamosOliveira)! - fix(conversion-collector): stamp context.app.name and context.library on the always-on native pipeline so app_name and sdk_version reach the collector without enabling context enrichment (AU-165)
+
+* Bump `js-cookie` to the patched 3.0.7 release to address CVE-2026-46625.
+
+- [`de02a216`](https://github.com/segmentio/analytics-next/commit/de02a21652369cdfda81f473227b583511607103) - Fix Conversion SDK `identify()` sending an empty `user_id`: derive it from BGID trait or SHA-256(email) when the caller doesn't pass an explicit userId. Also tag identify traits with `traits.navec` (and `traits.lotame` when configured) to identify the data source.
+
+* [`07cd91f3`](https://github.com/segmentio/analytics-next/commit/07cd91f376d38e0361b8ddd1737c1c25e6bff81d) Thanks [@furtadosamuel](https://github.com/furtadosamuel)! - Add twclid click-id enrichment and cover resilient Conversion SDK transport flows.
+
+## 1.84.0
+
+### Minor Changes
+
 - [#1342](https://github.com/segmentio/analytics-next/pull/1342) [`65951526`](https://github.com/segmentio/analytics-next/commit/65951526ddd696d14ca250453ccad48d170dc60a) Thanks [@MichaelGHSeg](https://github.com/MichaelGHSeg)! - Unify and harden HTTP response handling and retry behavior across browser and node SDKs.
 
   - Browser (`@segment/analytics-next`) - Add config-driven response handling for Segment.io delivery (`httpConfig` with rate-limit/backoff controls). - Improve batching/dispatcher retry semantics for 429 and transient failures. - Use configured `protocol` for batching requests when `apiHost` has no scheme, while preserving compatibility for `apiHost` values that already include `http://` or `https://`.
