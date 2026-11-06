@@ -43,7 +43,7 @@ let memoryLastActivity = 0
 
 let hostOnlyCookiesCleared = false
 
-function getCookie(name: string): string | null {
+export function getCookie(name: string): string | null {
   if (typeof document === 'undefined') {
     return null
   }
