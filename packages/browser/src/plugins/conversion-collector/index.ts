@@ -14,6 +14,7 @@ export {
 } from './runtime-registry'
 export { appEnrichment } from './app-enrichment'
 export { clickIdEnrichment } from './enrichment/click-id-enrichment'
+export { fbpEnrichment } from './enrichment/fbp-enrichment'
 export { sessionEnrichment } from './session-enrichment'
 export { conversionConsentEnrichment } from './enrichment/consent-enrichment'
 export { conversionContextEnrichment } from './enrichment/context-enrichment'

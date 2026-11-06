@@ -3,6 +3,7 @@ import { appEnrichment } from './app-enrichment'
 import { clickIdEnrichment } from './enrichment/click-id-enrichment'
 import { conversionConsentEnrichment } from './enrichment/consent-enrichment'
 import { conversionContextEnrichment } from './enrichment/context-enrichment'
+import { fbpEnrichment } from './enrichment/fbp-enrichment'
 import { conversionIdentifyEnrichment } from './enrichment/identify-enrichment'
 import { conversionPageEnrichment } from './enrichment/page-enrichment'
 import { conversionGptSlotEventsPlugin } from './gpt-slot-events'
@@ -20,6 +21,7 @@ export function conversionPipelinePlugins(
 ): Plugin[] {
   const plugins: Plugin[] = [
     clickIdEnrichment(),
+    fbpEnrichment(),
     appEnrichment(settings),
     sessionEnrichment(settings),
     conversionCollectorPlugin(settings),
