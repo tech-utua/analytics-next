@@ -1,7 +1,16 @@
 import { isSha256Hex, sha256Hex } from './sha256'
 import { normalizePhoneToE164 } from './phone'
+import { normalizeNamePart, splitFullName } from './name'
 
-const PHONE_TRAIT_KEYS = ['phone', 'whatsapp', 'telefone', 'mobile'] as const
+// client_phone é a chave usada pelos quizzes do BR; sem ela na lista o telefone
+// seguia em texto puro e não virava phone_hash.
+const PHONE_TRAIT_KEYS = [
+  'phone',
+  'whatsapp',
+  'telefone',
+  'mobile',
+  'client_phone',
+] as const
 const NAME_TRAIT_KEYS = ['name'] as const
 
 export type NormalizeIdentifyTraitsOptions = {
@@ -68,6 +77,41 @@ async function hashNameTrait(rawName: string): Promise<string> {
   return sha256Hex(trimmed.toLowerCase())
 }
 
+/**
+ * Primeiro nome e sobrenome para o `fn` / `ln` da Meta. `first_name` / `last_name`
+ * explícitos têm prioridade; senão saem do `name` (primeira e última palavra). Um
+ * `name` que já chegou como hash não dá para separar e não gera nada.
+ */
+function resolveNameParts(traits: Record<string, unknown>): {
+  firstName: string
+  lastName: string
+} {
+  const explicitFirst = asNonEmptyString(traits.first_name)
+  const explicitLast = asNonEmptyString(traits.last_name)
+  const fullName = asNonEmptyString(traits.name)
+  const fromFullName =
+    fullName && !isSha256Hex(fullName)
+      ? splitFullName(fullName)
+      : { firstName: '', lastName: '' }
+
+  const pick = (explicit: string | undefined, fallback: string) => {
+    if (!explicit) return fallback
+    return isSha256Hex(explicit)
+      ? explicit.toLowerCase()
+      : normalizeNamePart(explicit)
+  }
+
+  return {
+    firstName: pick(explicitFirst, fromFullName.firstName),
+    lastName: pick(explicitLast, fromFullName.lastName),
+  }
+}
+
+async function hashNamePart(normalized: string): Promise<string> {
+  if (!normalized) return ''
+  return isSha256Hex(normalized) ? normalized : sha256Hex(normalized)
+}
+
 export async function normalizeIdentifyTraits(
   traits: Record<string, unknown>,
   options: NormalizeIdentifyTraitsOptions = {}
@@ -105,6 +149,24 @@ export async function normalizeIdentifyTraits(
         out.phone_hash = hashedPhone
       }
     }
+  }
+
+  // Calculado sobre os traits originais, antes de `name` virar hash logo abaixo.
+  const { firstName, lastName } = resolveNameParts(traits)
+  const firstNameHash = await hashNamePart(firstName)
+  const lastNameHash = await hashNamePart(lastName)
+  if (firstNameHash) {
+    out.first_name_hash = firstNameHash
+    if (out.first_name != null) out.first_name = firstNameHash
+  } else if (asNonEmptyString(traits.first_name)) {
+    // Nunca deixa o first_name original seguir em texto puro.
+    delete out.first_name
+  }
+  if (lastNameHash) {
+    out.last_name_hash = lastNameHash
+    if (out.last_name != null) out.last_name = lastNameHash
+  } else if (asNonEmptyString(traits.last_name)) {
+    delete out.last_name
   }
 
   for (const key of NAME_TRAIT_KEYS) {
